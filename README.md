@@ -30,6 +30,10 @@ Developer intent  →  Requirements  →  Architecture  →  Diagrams  →  Gove
 
 The diagram below is the north star. Numbers map to the end-to-end flow; **✅ = shipping today**, **🚧 = in progress**, **📋 = planned / open for contribution**.
 
+![CDP-Agents end-to-end architecture flow](docs/architecture-flow.png)
+
+> The numbered table below mirrors this diagram, stage by stage.
+
 | # | Stage | What happens | Status |
 |---|-------|--------------|--------|
 | 1–2 | **CDP ChatBot** (Cloud Developer Platform Agent) | Reads the app repo (source, manifest, existing IaC), builds dependency maps, and chats with the developer to gather intent. Hands a Requirements JSON to the design pipeline. | 📋 |
