@@ -1,5 +1,11 @@
 # CDP-Agents — A Cloud Developer Platform Built From AI Agents
 
+<p align="center">
+  <img src="docs/architecture-flow.png" alt="CDP-Agents end-to-end architecture flow" width="760">
+  <br>
+  <em>Developer intent → requirements → architecture → diagrams → governance → provisioning, run by a fleet of agents. <a href="#%EF%B8%8F-the-full-flow-target-architecture">See the full flow ↓</a></em>
+</p>
+
 > **The pitch:** Turn "I need to ship this app to the cloud" into a **reviewed, policy-compliant, automatically-provisioned architecture** — designed, diagrammed, governed, and deployed by a fleet of cooperating AI agents.
 >
 > Today this repo ships the **Architecture Design Agent** (requirements → AWS design → diagram) and a **Terraform-state → diagram** tool. That's the first two organs of a much bigger body. **This README describes where we're going — and where you come in.** 👇
