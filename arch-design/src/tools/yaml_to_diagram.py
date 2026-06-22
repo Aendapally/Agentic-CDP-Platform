@@ -1,6 +1,5 @@
 from strands import tool
 import yaml
-import tempfile
 import os
 import subprocess
 import json
@@ -87,44 +86,6 @@ def generate_diagram_from_yaml(yaml_content: str, output_filename: str = "archit
             
     except Exception as e:
         return f"❌ Error generating diagram: {str(e)}"
-
-
-def generate_with_diagrams_as_code(yaml_content: str, output_path: str) -> str:
-    """
-    Generate diagram using diagrams-as-code library
-    """
-    try:
-        # Try to use diagrams-as-code if available
-        import diagrams_as_code
-        
-        # Create temporary YAML file
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as temp_file:
-            temp_file.write(yaml_content)
-            temp_yaml_path = temp_file.name
-        
-        try:
-            # Generate diagram using diagrams-as-code
-            result = subprocess.run([
-                'diagrams-as-code', 
-                'generate', 
-                temp_yaml_path,
-                '--output', output_path
-            ], capture_output=True, text=True, timeout=60)
-            
-            if result.returncode == 0:
-                return f"✅ Diagram generated successfully using diagrams-as-code: {output_path}"
-            else:
-                return f"❌ diagrams-as-code failed: {result.stderr}"
-                
-        finally:
-            # Clean up temporary file
-            if os.path.exists(temp_yaml_path):
-                os.unlink(temp_yaml_path)
-    
-    except ImportError:
-        return "❌ diagrams-as-code library not available, using fallback method"
-    except Exception as e:
-        return f"❌ Error with diagrams-as-code: {str(e)}"
 
 
 def generate_simple_diagram(parsed_yaml, output_path):
