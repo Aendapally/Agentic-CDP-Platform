@@ -95,10 +95,10 @@ provider:
   # --- Amazon Bedrock ---------------------------------------------------------
   class: "strands.models.BedrockModel"
   kwargs:
-    model_id: "us.anthropic.claude-3-7-sonnet-20250219-v1:0"          # e.g. us.amazon.claude-3-sonnet-v1:0
+    model_id: "global.anthropic.claude-sonnet-4-6"          # e.g. us.amazon.claude-3-sonnet-v1:0
     region_name: "us-west-2"          # aws region
-    temperature: 0.3 #0.1-0.5 high predictability of the model #0.6-1 low predictability of the model
-    top_p: 0.4 #control the randomness of text generation by selecting the next word from a dynamic set of the most probable words whose cumulative probability exceeds a threshold value (p)
+#    temperature: 0.3 #0.1-0.5 high predictability of the model #0.6-1 low predictability of the model
+#    top_p: 0.4 #control the randomness of text generation by selecting the next word from a dynamic set of the most probable words whose cumulative probability exceeds a threshold value (p)
     #top_k: <> instead of cumulative probability it works by reducing the vocabulary size to top k tokens (sorted in descending order by their probabilites).
     max_tokens: 4096
     timeout: 120  # Add timeout configuration

@@ -548,6 +548,24 @@ def load_agent():
 
 
 
+def _find_adt_ui_dir():
+    """Locate the pre-built ADT (agent-dev-toolkit) Next.js UI directory."""
+    # Check the bundled copy first (Docker image)
+    bundled = Path("/app/adt-ui")
+    if bundled.exists() and (bundled / "index.html").exists():
+        return bundled
+
+    # Fall back to the pip-installed agentcli package
+    try:
+        import agentcli
+        ui_out = Path(agentcli.__file__).parent / "ui" / "out"
+        if ui_out.exists() and (ui_out / "index.html").exists():
+            return ui_out
+    except ImportError:
+        pass
+    return None
+
+
 def create_app():
     """Create a standalone FastAPI app for the agent."""
 
@@ -729,20 +747,51 @@ def create_app():
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Error reading configuration: {str(e)}")
     
-    # nosem: useless-inner-function
-    @app.get("/")
-    async def root():
-        return {
-            "message": "Strands Agent Server (Container Mode)",
-            "version": "1.0.0",
-            "endpoints": {
-                "chat": "POST /chat",
-                "health": "GET /health", 
-                "info": "GET /info",
-                "config": "GET /config"
+    # Serve the ADT (agent-dev-toolkit) Next.js UI
+    from fastapi.responses import HTMLResponse, FileResponse
+    from fastapi.staticfiles import StaticFiles
+
+    adt_ui_dir = _find_adt_ui_dir()
+
+    if adt_ui_dir:
+        print(f"🎨 Serving ADT UI from {adt_ui_dir}")
+        app.mount("/static/_next", StaticFiles(directory=adt_ui_dir / "_next"), name="next-static")
+
+        mermaid_path = adt_ui_dir / "mermaid.min.js"
+        if mermaid_path.exists():
+            @app.get("/mermaid.min.js")
+            async def mermaid_js():
+                return FileResponse(mermaid_path, media_type="application/javascript")
+
+        @app.get("/", response_class=HTMLResponse)
+        async def root():
+            with open(adt_ui_dir / "index.html", "r") as f:
+                return HTMLResponse(f.read())
+
+        @app.get("/404", response_class=HTMLResponse)
+        async def not_found_page():
+            nf = adt_ui_dir / "404.html"
+            if nf.exists():
+                with open(nf, "r") as f:
+                    return HTMLResponse(f.read())
+            return HTMLResponse("<h1>404</h1>", status_code=404)
+    else:
+        print("⚠️  ADT UI not found — falling back to JSON API only")
+
+        @app.get("/")
+        async def root():
+            return {
+                "message": "Strands Agent Server (Container Mode)",
+                "version": "1.0.0",
+                "note": "Install agent-dev-toolkit for the chat UI",
+                "endpoints": {
+                    "chat": "POST /chat",
+                    "health": "GET /health",
+                    "info": "GET /info",
+                    "config": "GET /config"
+                }
             }
-        }
-    
+
     return app
     
 
