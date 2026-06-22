@@ -1,0 +1,224 @@
+diagram:
+  name: Node.js Web Application AWS Architecture
+  direction: top-down
+  format: png
+  open: true
+  resources:
+    - id: internet_users
+      name: Internet Users
+      type: generic.device.Mobile
+    - id: aws_customers
+      name: AWS Customers
+      type: generic.compute.Rack
+    - id: route_53
+      name: Route 53
+      type: aws.network.Route53
+    - id: cloudfront
+      name: CloudFront
+      type: aws.network.CloudFront
+    - id: aws_waf
+      name: AWS WAF
+      type: aws.security.WAF
+    - id: aws_shield
+      name: AWS Shield
+      type: aws.security.Shield
+    - id: certificate_manager
+      name: Certificate Manager
+      type: aws.security.CertificateManager
+    - id: application_load_balancer
+      name: Application Load Balancer
+      type: aws.network.ElbApplicationLoadBalancer
+    - id: nat_gateway
+      name: NAT Gateway
+      type: aws.network.NATGateway
+    - id: network_load_balancer
+      name: Network Load Balancer (PrivateLink)
+      type: aws.network.ElbNetworkLoadBalancer
+    - id: ecs_web
+      name: ECS Fargate (Node.js Web App)
+      type: aws.compute.Fargate
+    - id: cognito
+      name: Amazon Cognito
+      type: aws.security.Cognito
+    - id: secrets_manager
+      name: Secrets Manager
+      type: aws.security.SecretsManager
+    - id: ecs_backend_1
+      name: ECS Fargate (Service 1)
+      type: aws.compute.Fargate
+    - id: ecs_backend_2
+      name: ECS Fargate (Service 2)
+      type: aws.compute.Fargate
+    - id: ecs_backend_3
+      name: ECS Fargate (Service 3)
+      type: aws.compute.Fargate
+    - id: cloud_map
+      name: AWS Cloud Map
+      type: aws.network.CloudMap
+    - id: dynamodb
+      name: DynamoDB
+      type: aws.database.Dynamodb
+    - id: dax
+      name: DAX
+      type: aws.database.DAX
+    - id: privatelink
+      name: AWS PrivateLink
+      type: aws.network.Privatelink
+    - id: transit_gateway
+      name: Transit Gateway
+      type: aws.network.TransitGateway
+    - id: vpc_endpoints
+      name: VPC Endpoints
+      type: aws.network.Endpoint
+    - id: cloudwatch
+      name: CloudWatch
+      type: aws.management.Cloudwatch
+    - id: cloudtrail
+      name: CloudTrail
+      type: aws.management.Cloudtrail
+    - id: x_ray
+      name: X-Ray
+      type: aws.devtools.XRay
+    - id: guardduty
+      name: GuardDuty
+      type: aws.security.Guardduty
+    - id: ecr
+      name: ECR
+      type: aws.compute.ECR
+  
+  clusters:
+    - id: public_internet
+      name: Public Internet
+      resources:
+        - internet_users
+        - aws_customers
+
+    - id: edge_layer
+      name: Edge Layer
+      resources:
+        - route_53
+        - cloudfront
+        - aws_waf
+        - aws_shield
+        - certificate_manager
+
+    - id: vpc
+      name: VPC
+      clusters:
+        - id: public_subnets
+          name: Public Subnets
+          resources:
+            - application_load_balancer
+            - nat_gateway
+            - network_load_balancer
+
+        - id: private_subnets_web
+          name: Private Subnets - Web Tier
+          resources:
+            - ecs_web
+            - cognito
+            - secrets_manager
+
+        - id: private_subnets_backend
+          name: Private Subnets - Backend Tier
+          resources:
+            - ecs_backend_1
+            - ecs_backend_2
+            - ecs_backend_3
+            - cloud_map
+
+        - id: private_subnets_data
+          name: Private Subnets - Data Tier
+          resources:
+            - dynamodb
+            - dax
+
+    - id: private_connectivity
+      name: Private Connectivity
+      resources:
+        - privatelink
+        - transit_gateway
+        - vpc_endpoints
+
+    - id: management_services
+      name: Management & Monitoring
+      resources:
+        - cloudwatch
+        - cloudtrail
+        - x_ray
+        - guardduty
+        - ecr
+
+  relationships:
+    - from: internet_users
+      to: cloudfront
+      label: HTTPS (443)
+    - from: cloudfront
+      to: aws_waf
+      label: Filter Requests
+    - from: aws_waf
+      to: application_load_balancer
+      label: Filtered Traffic
+    - from: application_load_balancer
+      to: ecs_web
+      label: Route Requests
+    - from: ecs_web
+      to: ecs_backend_1
+      label: REST API
+    - from: ecs_web
+      to: ecs_backend_2
+      label: REST API
+    - from: ecs_web
+      to: ecs_backend_3
+      label: REST API
+    - from: ecs_backend_1
+      to: dynamodb
+      label: Read/Write
+    - from: ecs_backend_2
+      to: dynamodb
+      label: Read/Write
+    - from: ecs_backend_3
+      to: dynamodb
+      label: Read/Write
+    - from: dynamodb
+      to: dax
+      label: Cache
+    - from: aws_customers
+      to: privatelink
+      label: Private Connection
+    - from: privatelink
+      to: network_load_balancer
+      label: Private Endpoint
+    - from: network_load_balancer
+      to: ecs_web
+      label: Private Traffic
+    - from: ecs_web
+      to: cognito
+      label: Authentication
+    - from: ecs_web
+      to: secrets_manager
+      label: Get Secrets
+    - from: ecs_backend_1
+      to: cloud_map
+      label: Service Discovery
+    - from: ecs_backend_2
+      to: cloud_map
+      label: Service Discovery
+    - from: ecs_backend_3
+      to: cloud_map
+      label: Service Discovery
+    - from: ecs_web
+      to: cloudwatch
+      label: Logs & Metrics
+    - from: ecs_backend_1
+      to: cloudwatch
+      label: Logs & Metrics
+    - from: ecs_backend_2
+      to: cloudwatch
+      label: Logs & Metrics
+    - from: ecs_backend_3
+      to: cloudwatch
+      label: Logs & Metrics
+    - from: dynamodb
+      to: cloudwatch
+      label: Metrics

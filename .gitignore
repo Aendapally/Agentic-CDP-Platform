@@ -109,5 +109,23 @@ venv.bak/
 .specstory/
 .cursorindexingignore
 
-adt-readme.md
-ref.yaml
+# Archived files (old outputs, upstream library, test artifacts)
+archive/
+
+# Agent-generated output folders (timestamped)
+*_2025*/
+*_2026*/
+
+# Generated diagram outputs (PNGs, folder_info)
+arch-design/test_data/output*/
+.folder_info
+
+# Bundled ADT UI assets (copied from pip package for Docker)
+arch-design/adt-ui/
+
+# Large binary outputs
+*.png
+
+# ...but keep documentation assets (e.g. architecture diagram)
+!docs/
+!docs/*.png
