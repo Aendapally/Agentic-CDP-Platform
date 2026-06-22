@@ -629,12 +629,13 @@ def create_app():
                 raise HTTPException(status_code=500, detail=str(e))
                 
     except Exception as e:
-        print(f"❌ Failed to load agent: {e}")
-        
+        load_error = str(e)
+        print(f"❌ Failed to load agent: {load_error}")
+
         # nosem: useless-inner-function
         @app.post("/chat")
         async def chat_endpoint_error(request: AgentRequest):
-            raise HTTPException(status_code=500, detail=f"Agent failed to load: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Agent failed to load: {load_error}")
         
         agent = None
     
